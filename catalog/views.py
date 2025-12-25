@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 def home(request):
-    return render(request, 'catalog/home.html')
+    return render(request, 'catalog/home.html/')
 
 def contacts(request):
     if request.method == 'POST':
@@ -10,4 +10,4 @@ def contacts(request):
         message = request.POST.get('message')
 
         return HttpResponse(f'Спасибо {name}! сообщение получено.')
-    return render(request, 'catalog/contacts.html')
+    return render(request, 'catalog/contacts.html/')
