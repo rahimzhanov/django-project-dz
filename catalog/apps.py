@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class StudentsConfig(AppConfig):
+class CatalogConfig(AppConfig):
     name = 'catalog'
