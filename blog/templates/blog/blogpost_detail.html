@@ -1,0 +1,45 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{ blogpost.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        {% if blogpost.preview %}
+        <img src="{{ blogpost.preview.url }}" class="img-fluid rounded mb-4" alt="{{ blogpost.title }}">
+        {% endif %}
+
+        <h1>{{ blogpost.title }}</h1>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <small class="text-muted">Опубликовано: {{ blogpost.created_at|date:"d.m.Y H:i" }}</small>
+            <small class="text-muted">Просмотров: {{ blogpost.views_count }}</small>
+        </div>
+
+        <div class="blog-content mb-5">
+            {{ blogpost.content|linebreaks }}
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'blog:blogpost_list' %}" class="btn btn-secondary">Назад к списку</a>
+            <div>
+                <a href="{% url 'blog:blogpost_update' blogpost.pk %}" class="btn btn-warning">Редактировать</a>
+                <a href="{% url 'blog:blogpost_delete' blogpost.pk %}" class="btn btn-danger">Удалить</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Информация о статье</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Статус:</strong> {% if blogpost.is_published %}Опубликована{% else %}Черновик{% endif %}</p>
+                <p><strong>Дата создания:</strong> {{ blogpost.created_at|date:"d.m.Y H:i" }}</p>
+                <p><strong>Просмотров:</strong> {{ blogpost.views_count }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
