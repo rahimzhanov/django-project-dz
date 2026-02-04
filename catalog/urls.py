@@ -10,6 +10,7 @@ from .views import (
     ProductDeleteView
 )
 
+
 app_name = 'catalog'
 
 urlpatterns = [
@@ -21,6 +22,5 @@ urlpatterns = [
     path('product/<int:pk>/delete/', ProductDeleteView.as_view(), name='product_delete'),
 ]
 
-# Для работы с медиафайлами в режиме разработки
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

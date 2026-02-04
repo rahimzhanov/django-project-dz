@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+
+from django.conf.global_settings import AUTH_USER_MODEL, LOGIN_REDIRECT_URL
 from dotenv import load_dotenv
 
 # Загружаем переменные окружения из файла .env
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'catalog',
     'blog.apps.BlogConfig',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -137,4 +140,22 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LOGIN_URL = '/admin/login/'
+
+
+AUTH_USER_MODEL = 'users.User'
+
+
+# Добавить в settings.py
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Для тестирования
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'amanrahim2@mail.com'
+EMAIL_HOST_PASSWORD = '123qwe'
+EMAIL_USE_TLS = True
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# settings.py
+LOGIN_URL = '/users/login/'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/'
