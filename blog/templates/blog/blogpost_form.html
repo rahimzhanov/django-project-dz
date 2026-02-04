@@ -1,0 +1,54 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{% if object %}Редактировать {{ object.title }}{% else %}Создать статью{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="mb-4">{% if object %}Редактировать статью{% else %}Создать новую статью{% endif %}</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Заголовок</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <div class="text-danger">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_content" class="form-label">Содержимое</label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                <div class="text-danger">{{ form.content.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_preview" class="form-label">Превью (изображение)</label>
+                {{ form.preview }}
+                {% if form.preview.errors %}
+                <div class="text-danger">{{ form.preview.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3 form-check">
+                {{ form.is_published }}
+                <label for="id_is_published" class="form-check-label">Опубликовать</label>
+                {% if form.is_published.errors %}
+                <div class="text-danger">{{ form.is_published.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'blog:blogpost_list' %}" class="btn btn-secondary">Отмена</a>
+                <button type="submit" class="btn btn-success">
+                    {% if object %}Сохранить изменения{% else %}Создать статью{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
