@@ -1,0 +1,43 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}Удаление продукта{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="card-title mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Подтверждение удаления
+                </h4>
+            </div>
+            <div class="card-body">
+                <h5>Вы уверены, что хотите удалить продукт?</h5>
+                
+                <div class="alert alert-warning">
+                    <strong>Название:</strong> {{ object.name }}<br>
+                    <strong>Категория:</strong> {{ object.category.name }}<br>
+                    <strong>Цена:</strong> {{ object.price }} руб.
+                </div>
+                
+                <p class="text-danger">
+                    <i class="bi bi-exclamation-circle"></i>
+                    Это действие нельзя отменить. Все данные о продукте будут удалены.
+                </p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'catalog:product_detail' object.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Удалить продукт
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
