@@ -9,6 +9,7 @@ class Command(BaseCommand):
         if not User.objects.filter(email='admin@example.com').exists():
             user = User.objects.create(
                 email='admin@example.com',
+                username='admin_user',
                 phone_number='+79999999999',  # Добавить
                 country='Россия',  # Добавить
                 is_active=True,

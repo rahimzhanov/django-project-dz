@@ -1,3 +1,4 @@
+<!-- catalog/templates/catalog/home.html -->
 {% extends 'catalog/base.html' %}
 
 {% block title %}Главная страница{% endblock %}
@@ -20,6 +21,12 @@
             {% endif %}
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title">{{ product.name }}</h5>
+
+                <!-- Статус продукта -->
+                <span class="badge {% if product.is_published %}bg-success{% else %}bg-warning{% endif %} mb-2">
+                    {% if product.is_published %}Опубликован{% else %}Не опубликован{% endif %}
+                </span>
+
                 <p class="card-text">
                     {{ product.description|truncatechars:100 }}
                 </p>
@@ -30,12 +37,16 @@
                     <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-primary btn-sm">
                         <i class="bi bi-eye"></i> Подробнее
                     </a>
+
+                    <!-- Кнопки редактирования и удаления показываем только владельцу или модератору -->
+                    {% if user.is_authenticated and product.owner == user or user.is_authenticated and user.groups.all.0.name == "Модератор продуктов" %}
                     <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-warning btn-sm">
                         <i class="bi bi-pencil"></i> Редактировать
                     </a>
                     <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-danger btn-sm">
                         <i class="bi bi-trash"></i> Удалить
                     </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

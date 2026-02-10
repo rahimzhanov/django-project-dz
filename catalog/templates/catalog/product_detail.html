@@ -1,3 +1,4 @@
+<!-- catalog/templates/catalog/product_detail.html -->
 {% extends 'catalog/base.html' %}
 
 {% block title %}{{ product.name }}{% endblock %}
@@ -15,6 +16,18 @@
     </div>
     <div class="col-md-6">
         <h1 class="mb-3">{{ product.name }}</h1>
+
+        <!-- Статус продукта -->
+        <div class="alert
+            {% if product.is_published %}alert-success{% else %}alert-warning{% endif %}">
+            <h5 class="mb-0">
+                Статус:
+                <span class="badge
+                    {% if product.is_published %}bg-success{% else %}bg-warning{% endif %}">
+                    {% if product.is_published %}Опубликован{% else %}Не опубликован{% endif %}
+                </span>
+            </h5>
+        </div>
 
         <div class="alert alert-info">
             <h5 class="mb-0">Цена: <span class="badge bg-success fs-5">{{ product.price }} руб.</span></h5>
@@ -35,6 +48,13 @@
             </div>
             <div class="card-body">
                 <p><strong>Категория:</strong> {{ product.category.name }}</p>
+                <p><strong>Владелец:</strong>
+                    {% if product.owner %}
+                        {{ product.owner.email }}
+                    {% else %}
+                        Не указан
+                    {% endif %}
+                </p>
                 <p><strong>Дата создания:</strong> {{ product.created_at|date:"d.m.Y H:i" }}</p>
                 <p><strong>Последнее обновление:</strong> {{ product.updated_at|date:"d.m.Y H:i" }}</p>
             </div>
@@ -44,12 +64,26 @@
             <a href="{% url 'catalog:home' %}" class="btn btn-outline-secondary me-2">
                 <i class="bi bi-arrow-left"></i> Назад на главную
             </a>
+
+            <!-- Кнопки редактирования и удаления показываем только владельцу или модератору -->
+            {% if user.is_authenticated and product.owner == user or user.is_authenticated and user.groups.all.0.name == "Модератор продуктов" %}
             <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-warning me-2">
                 <i class="bi bi-pencil"></i> Редактировать
             </a>
-            <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-danger">
+            <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-danger me-2">
                 <i class="bi bi-trash"></i> Удалить
             </a>
+            {% endif %}
+
+            <!-- Кнопка отмены публикации только для модераторов -->
+            {% if user.is_authenticated and user.has_perm 'catalog.can_unpublish_product' and product.is_published %}
+            <form method="post" action="{% url 'catalog:product_unpublish' product.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-x-circle"></i> Отменить публикацию
+                </button>
+            </form>
+            {% endif %}
         </div>
     </div>
 </div>

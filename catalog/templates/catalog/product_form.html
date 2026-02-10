@@ -18,7 +18,7 @@
             <div class="card-body">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    
+
                     {% for field in form %}
                     <div class="mb-3">
                         <label for="{{ field.id_for_label }}" class="form-label">
@@ -27,7 +27,7 @@
                                 <span class="text-danger">*</span>
                             {% endif %}
                         </label>
-                        
+
                         {% if field.name == 'image' %}
                             <div class="custom-file">
                                 {{ field }}
@@ -38,11 +38,11 @@
                         {% else %}
                             {{ field }}
                         {% endif %}
-                        
+
                         {% if field.help_text %}
                             <div class="form-text">{{ field.help_text }}</div>
                         {% endif %}
-                        
+
                         {% if field.errors %}
                             <div class="alert alert-danger mt-2">
                                 {% for error in field.errors %}
@@ -52,7 +52,7 @@
                         {% endif %}
                     </div>
                     {% endfor %}
-                    
+
                     <div class="d-flex justify-content-between">
                         <a href="{% url 'catalog:home' %}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Назад

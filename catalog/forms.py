@@ -17,12 +17,14 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'image', 'category', 'price']
+        fields = ['name', 'description', 'image', 'category', 'price', 'is_published']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
+            'is_published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         # Стилизация полей формы
         for field_name, field in self.fields.items():
@@ -30,6 +32,8 @@ class ProductForm(forms.ModelForm):
                 field.widget.attrs.update({'class': 'form-control-file'})
             elif field_name == 'description':
                 field.widget.attrs.update({'class': 'form-control', 'placeholder': 'Подробное описание товара'})
+            elif field_name == 'is_published':
+                field.widget.attrs.update({'class': 'form-check-input'})
             else:
                 field.widget.attrs.update({'class': 'form-control'})
 
@@ -71,3 +75,16 @@ class ProductForm(forms.ModelForm):
             raise ValidationError('Цена не может быть нулевой')
 
         return price
+
+    def save(self, commit=True):
+        """Сохраняем форму и устанавливаем владельца"""
+        product = super().save(commit=False)
+
+        # Если пользователь передан и продукт новый (нет pk)
+        if self.user and not product.pk:
+            product.owner = self.user
+
+        if commit:
+            product.save()
+
+        return product
