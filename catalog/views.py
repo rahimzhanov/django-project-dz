@@ -1,4 +1,5 @@
 # catalog/views.py
+from django.core.cache import cache
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.urls import reverse_lazy, reverse
@@ -6,9 +7,10 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
-
+from django.views.decorators.cache import cache_page
 from catalog.models import Product, Category
 from catalog.forms import ProductForm
+from .services import get_products_by_category, get_category_name
 
 
 class HomeView(ListView):
@@ -17,9 +19,34 @@ class HomeView(ListView):
     context_object_name = 'products'
 
     def get_queryset(self):
-        # Показываем только опубликованные продукты на главной
-        return Product.objects.filter(is_published=True)[:6]
+        # НИЗКОУРОВНЕВОЕ КЕШИРОВАНИЕ - кешируем только данные
+        cache_key = 'home_products_list'
+        products = cache.get(cache_key)
 
+        if not products:
+            # Если в кеше нет, получаем из базы
+            products = list(Product.objects.filter(is_published=True)[:6])
+            # Сохраняем в кеш на 10 минут
+            cache.set(cache_key, products, timeout=60 * 10)
+            print("Данные получены из БАЗЫ")  # Для отладки
+        else:
+            print("Данные получены из КЕША")  # Для отладки
+
+        return products
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Тоже используем низкоуровневое кеширование для категорий
+        cache_key_categories = 'home_categories_list'
+        categories = cache.get(cache_key_categories)
+
+        if not categories:
+            categories = list(Category.objects.all()[:10])
+            cache.set(cache_key_categories, categories, timeout=60 * 30)
+
+        context['categories'] = categories
+        return context
 
 class ContactsView(View):
     template_name = 'catalog/contacts.html'
@@ -33,6 +60,7 @@ class ContactsView(View):
         return HttpResponse(f'Спасибо {name}! сообщение получено.')
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class ProductDetailView(DetailView):
     model = Product
     template_name = 'catalog/product_detail.html'
@@ -147,3 +175,30 @@ class ProductUnpublishView(View):
         product.save()
 
         return redirect('catalog:product_detail', pk=product.pk)
+
+
+class CategoryProductsView(ListView):
+    """
+    Представление для отображения продуктов в категории
+    """
+    model = Product
+    template_name = 'catalog/category_products.html'
+    context_object_name = 'products'
+    paginate_by = 9  # Пагинация по 9 продуктов на страницу
+
+    def get_queryset(self):
+        category_id = self.kwargs.get('category_id')
+        return get_products_by_category(category_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category_id = self.kwargs.get('category_id')
+
+        context['category_name'] = get_category_name(category_id)
+        context['category_id'] = category_id
+
+        # Добавляем информацию о кешировании
+        context['from_cache'] = 'Данные загружены из кеша' if cache.get(
+            f'products_category_{category_id}') else 'Данные загружены из базы данных'
+
+        return context
